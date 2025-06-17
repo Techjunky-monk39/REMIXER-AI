@@ -1,0 +1,30 @@
+# Python virtual environments
+remixed_ai_amv_py38.venv/ # Explicitly ignore your venv folder
+# You can uncomment and use these general ones if you create other venvs with different naming conventions in the future:
+# .venv/
+# env/
+# venv/
+
+# Byte-code files
+*.pyc
+__pycache__/
+
+# Operating System files
+.DS_Store # macOS
+Thumbs.db # Windows
+
+# Spleeter related files and folders (very important!)
+pretrained_models/
+.spleeter/
+output/
+# If your downloaded_audio is inside your project and you don't want to track it
+downloaded_audio/
+# If your separated_tracks is inside your project and you don't want to track it
+separated_tracks/
+
+# VS Code specific files (optional, but common)
+.vscode/
+
+# Ignore any specific log files or temporary files
+*.log
+*.tmp
