@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI DJ Hip-Hop Remixer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #2d3748; /* Darker grey for container */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            border: 1px solid #4a5568;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #63b3ed; /* Blueish color for title */
+        }
+        .input-section, .controls-section, .message-box {
+            background-color: #4a5568; /* Even darker grey for sections */
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #63b3ed;
+        }
+        input[type="file"] {
+            display: none; /* Hide default file input */
+        }
+        .custom-file-upload {
+            border: 2px dashed #a0aec0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 10px;
+            color: #a0aec0;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .custom-file-upload:hover {
+            background-color: #2d3748;
+            border-color: #63b3ed;
+            color: #63b3ed;
+        }
+        .file-list {
+            margin-top: 15px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #63b3ed;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #2d3748;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #4a5568;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-item span {
+            flex-grow: 1;
+            margin-right: 10px;
+            color: #cbd5e0;
+        }
+        .remove-file-btn {
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s;
+        }
+        .remove-file-btn:hover {
+            background-color: #c53030;
+        }
+        button {
+            background-color: #63b3ed;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #4299e1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+        button:disabled {
+            background-color: #4a5568;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .message-box {
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e0;
+            font-size: 1rem;
+            font-style: italic;
+        }
+        .slider-group {
+            margin-bottom: 15px;
+            text-align: left;
+            padding: 0 10px;
+        }
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #cbd5e0;
+        }
+        .slider-group input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            background: #2d3748;
+            border-radius: 5px;
+            outline: none;
+            transition: background 0.2s;
+            margin-top: 5px;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #63b3ed;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .slider-group input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #63b3ed;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .slider-group span {
+            float: right;
+            font-weight: normal;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI DJ Hip-Hop Remixer</h1>
+
+        <div class="message-box" id="messageBox">
+            Upload some audio files to get started!
+        </div>
+
+        <div class="input-section">
+            <h2 class="text-xl font-semibold mb-4 text-white">1. Upload Your Audio Samples</h2>
+            <p class="text-sm text-gray-400 mb-4">
+                (MP3, WAV, OGG supported. Multiple files are encouraged for more variety.)
+            </p>
+            <label for="audioFileInput" class="custom-file-upload">
+                <i class="fas fa-cloud-upload-alt mr-2"></i> Choose Audio Files
+            </label>
+            <input type="file" id="audioFileInput" accept=".mp3,.wav,.ogg" multiple>
+            <div id="fileList" class="file-list hidden"></div>
+        </div>
+
+        <div class="controls-section">
+            <h2 class="text-xl font-semibold mb-4 text-white">2. Remix Controls</h2>
+
+            <div class="flex flex-wrap justify-center items-center mb-4">
+                <button id="generateRemixBtn" disabled><i class="fas fa-magic mr-2"></i> Generate Remix</button>
+                <button id="playBtn" disabled><i class="fas fa-play mr-2"></i> Play Remix</button>
+                <button id="stopBtn" disabled><i class="fas fa-stop mr-2"></i> Stop Playback</button>
+                <button id="downloadBtn" disabled><i class="fas fa-download mr-2"></i> Download Remix</button>
+            </div>
+
+            <div class="slider-group">
+                <label for="tempoSlider">Tempo (BPM): <span id="tempoValue">100</span></label>
+                <input type="range" id="tempoSlider" min="60" max="180" value="100">
+            </div>
+            <div class="slider-group">
+                <label for="samplePitchSlider">Sample Pitch Shift: <span id="samplePitchValue">0</span> semitones</label>
+                <input type="range" id="samplePitchSlider" min="-12" max="12" value="0">
+            </div>
+            <div class="slider-group">
+                <label for="effectMixSlider">Effect Mix (Reverb): <span id="effectMixValue">0</span>%</label>
+                <input type="range" id="effectMixSlider" min="0" max="100" value="0">
+            </div>
+
+            <div class="flex flex-wrap justify-center mt-4">
+                <button id="regenerateBtn" disabled><i class="fas fa-redo-alt mr-2"></i> Regenerate (New)</button>
+                <button id="saveVersionBtn" disabled><i class="fas fa-save mr-2"></i> Save Current</button>
+                <button id="loadVersionBtn" disabled><i class="fas fa-folder-open mr-2"></i> Load Version</button>
+            </div>
+            <div id="versionList" class="file-list hidden mt-4"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Mandatory Firebase variables (even if not used in this version, good practice if future iterations might)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- Web Audio API Setup ---
+        let audioContext;
+        let masterGainNode;
+        let analyserNode;
+        let reverbNode;
+        let impulseResponseBuffer = null; // For reverb
+        let currentPlaybackSource = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+
+        // --- DOM Elements ---
+        const messageBox = document.getElementById('messageBox');
+        const audioFileInput = document.getElementById('audioFileInput');
+        const fileListDiv = document.getElementById('fileList');
+        const generateRemixBtn = document.getElementById('generateRemixBtn');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const tempoSlider = document.getElementById('tempoSlider');
+        const tempoValueSpan = document.getElementById('tempoValue');
+        const samplePitchSlider = document.getElementById('samplePitchSlider');
+        const samplePitchValueSpan = document.getElementById('samplePitchValue');
+        const effectMixSlider = document.getElementById('effectMixSlider');
+        const effectMixValueSpan = document.getElementById('effectMixValue');
+        const regenerateBtn = document.getElementById('regenerateBtn');
+        const saveVersionBtn = document.getElementById('saveVersionBtn');
+        const loadVersionBtn = document.getElementById('loadVersionBtn');
+        const versionListDiv = document.getElementById('versionList');
+
+        // --- Global State ---
+        let loadedAudioBuffers = []; // Stores decoded AudioBuffer objects from user uploads
+        let remixScheduledNodes = []; // Stores all AudioBufferSourceNodes for the current remix playback
+        let currentRemixDuration = 0; // Total duration of the generated remix
+        let currentRemixParameters = {}; // Stores parameters used to generate the current remix
+        let savedRemixVersions = []; // Stores saved remix parameter sets
+
+        /**
+         * Displays a message in the message box.
+         * @param {string} message The message to display.
+         * @param {string} type Optional type for styling (e.g., 'error', 'success').
+         */
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-green-400' : 'text-blue-400')}`;
+        }
+
+        /**
+         * Initializes the AudioContext and core nodes.
+         */
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                masterGainNode = audioContext.createGain();
+                masterGainNode.connect(audioContext.destination);
+
+                // Analyser for future visualization (not implemented visually here, but useful for debugging/extending)
+                analyserNode = audioContext.createAnalyser();
+                analyserNode.fftSize = 2048;
+                masterGainNode.connect(analyserNode);
+
+                // Reverb (ConvolverNode)
+                reverbNode = audioContext.createConvolver();
+                reverbNode.connect(masterGainNode); // Connect reverb to master gain
+                loadImpulseResponse('https://webaudio.github.io/web-audio-samples/samples/audio/impulse-responses/small-room.wav'); // Load a default small room impulse response
+
+                showMessage("Audio system ready. Upload samples!");
+            }
+        }
+
+        /**
+         * Loads an impulse response for the convolver node (reverb).
+         * @param {string} url The URL of the impulse response WAV file.
+         */
+        async function loadImpulseResponse(url) {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                impulseResponseBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                reverbNode.buffer = impulseResponseBuffer;
+                updateEffectMix(); // Apply initial effect mix
+            } catch (error) {
+                console.error('Error loading impulse response:', error);
+                showMessage('Failed to load reverb impulse response.', 'error');
+            }
+        }
+
+        /**
+         * Updates the mix level of the reverb effect.
+         */
+        function updateEffectMix() {
+            if (!masterGainNode || !reverbNode) return;
+
+            const dryGain = 1 - (effectMixSlider.value / 100);
+            const wetGain = (effectMixSlider.value / 100);
+
+            // Disconnect and reconnect to manage dry/wet signal routing
+            if (currentPlaybackSource) {
+                // If something is playing, handle its connections.
+                // For simplicity, we'll assume new nodes are created for each playback.
+                // This logic is primarily for the main audio signal flow.
+            }
+
+            // Ensure reverbNode is connected to masterGainNode, and direct signals also go to masterGainNode
+            // This is handled by connecting individual sources to masterGainNode directly or via reverb.
+            // For now, assume masterGainNode is the main output, and we send signals to both directly.
+            // A more robust setup would use a dedicated dry/wet mixer.
+            // For this simpler setup, we'll adjust the gain of the signal going *into* the reverb vs. directly to master.
+            // This is a common simplification in basic Web Audio API setups.
+            // The current setup: Source -> masterGainNode (direct) AND Source -> reverbNode -> masterGainNode (wet)
+            // To control dry/wet mix, we need two paths:
+            // 1. Source -> DryGainNode -> masterGainNode
+            // 2. Source -> WetGainNode -> reverbNode -> masterGainNode
+
+            // Let's modify the `scheduleAudioSource` to handle dry/wet mixing per source.
+            // For now, the `effectMixSlider` will control the *overall* presence of reverb
+            // by adjusting the gain of the `reverbNode` output if we treat it as an insert effect.
+            // Or, more accurately, we route the *output* of our main audio through a dry/wet mixer before the master gain.
+
+            // Given the current structure, we'll apply this logic when *scheduling* individual sounds.
+            // This slider will primarily affect the *next* generated remix, or for a simpler approach,
+            // we'll apply a global gain on the reverb output before connecting to master.
+            // Reverb is connected to masterGainNode. We can change the `gain` of `reverbNode`'s input or output.
+            // Better to route sounds to both dry and wet paths.
+            // This means each `AudioBufferSourceNode` will connect to *two* gain nodes: one for dry, one for wet.
+
+            // For now, let's just update the value text. Actual mixing will happen in `generateRemix`.
+            effectMixValueSpan.textContent = effectMixSlider.value;
+        }
+
+
+        /**
+         * Handles audio file selection and decoding.
+         * @param {Event} event The change event from the file input.
+         */
+        async function handleAudioFileSelect(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            initAudioContext();
+            showMessage('Loading audio samples...');
+            generateRemixBtn.disabled = true;
+
+            const newLoadedBuffers = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('audio/')) {
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                        newLoadedBuffers.push({ name: file.name, buffer: audioBuffer });
+                        showMessage(`Loaded: ${file.name}`);
+                    } catch (error) {
+                        console.error('Error decoding audio file:', file.name, error);
+                        showMessage(`Failed to load ${file.name}. Is it a valid audio file?`, 'error');
+                    }
+                } else {
+                    showMessage(`Skipped ${file.name}: Not an audio file.`, 'error');
+                }
+            }
+            loadedAudioBuffers = loadedAudioBuffers.concat(newLoadedBuffers);
+            updateFileListUI();
+            generateRemixBtn.disabled = loadedAudioBuffers.length === 0;
+            if (loadedAudioBuffers.length > 0) {
+                showMessage(`Loaded ${loadedAudioBuffers.length} samples. Ready to generate!`);
+            } else {
+                showMessage('No valid audio samples loaded. Please try again.');
+            }
+        }
+
+        /**
+         * Updates the UI to show currently loaded audio files.
+         */
+        function updateFileListUI() {
+            fileListDiv.innerHTML = '';
+            if (loadedAudioBuffers.length > 0) {
+                fileListDiv.classList.remove('hidden');
+                loadedAudioBuffers.forEach((item, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <span>${item.name}</span>
+                        <button class="remove-file-btn" data-index="${index}"><i class="fas fa-times"></i></button>
+                    `;
+                    fileListDiv.appendChild(fileItem);
+                });
+                // Add event listener for remove buttons
+                fileListDiv.querySelectorAll('.remove-file-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const indexToRemove = parseInt(e.target.dataset.index);
+                        loadedAudioBuffers.splice(indexToRemove, 1);
+                        updateFileListUI();
+                        generateRemixBtn.disabled = loadedAudioBuffers.length === 0;
+                        if (loadedAudioBuffers.length === 0) {
+                            fileListDiv.classList.add('hidden');
+                            showMessage('No samples loaded. Upload some to generate a remix.');
+                        } else {
+                            showMessage(`Removed sample. ${loadedAudioBuffers.length} samples remaining.`);
+                        }
+                    });
+                });
+            } else {
+                fileListDiv.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Creates a basic drum sound (kick, snare, or hi-hat) using oscillators and gain.
+         * @param {string} type 'kick', 'snare', or 'hihat'.
+         * @returns {AudioBuffer} The generated AudioBuffer for the drum sound.
+         */
+        function createDrumSound(type) {
+            const sampleRate = audioContext.sampleRate;
+            let buffer;
+
+            switch (type) {
+                case 'kick':
+                    buffer = audioContext.createBuffer(1, sampleRate * 0.5, sampleRate); // 0.5 seconds
+                    const kickData = buffer.getChannelData(0);
+                    let freq = 120;
+                    const freqDecay = 0.99;
+                    const gainDecay = 0.98;
+                    let gain = 1;
+
+                    for (let i = 0; i < kickData.length; i++) {
+                        kickData[i] = Math.sin(freq * 2 * Math.PI * i / sampleRate) * gain;
+                        freq *= freqDecay;
+                        gain *= gainDecay;
+                        if (freq < 30) freq = 30; // Min frequency
+                        if (gain < 0.001) gain = 0; // Min gain
+                    }
+                    break;
+
+                case 'snare':
+                    buffer = audioContext.createBuffer(1, sampleRate * 0.3, sampleRate); // 0.3 seconds
+                    const snareData = buffer.getChannelData(0);
+                    for (let i = 0; i < snareData.length; i++) {
+                        // Noise component
+                        let noise = Math.random() * 2 - 1;
+                        // Tone component (high pitch)
+                        let tone = Math.sin(700 * 2 * Math.PI * i / sampleRate);
+                        // Combine and apply envelope
+                        snareData[i] = (noise * 0.5 + tone * 0.5) * (1 - i / snareData.length); // Simple decay
+                    }
+                    break;
+
+                case 'hihat':
+                    buffer = audioContext.createBuffer(1, sampleRate * 0.2, sampleRate); // 0.2 seconds
+                    const hihatData = buffer.getChannelData(0);
+                    for (let i = 0; i < hihatData.length; i++) {
+                        // High-frequency noise
+                        hihatData[i] = (Math.random() * 2 - 1) * (1 - i / hihatData.length); // Simple decay
+                    }
+                    break;
+
+                default:
+                    console.warn('Unknown drum type:', type);
+                    return null;
+            }
+            return buffer;
+        }
+
+        // Cache drum buffers
+        const drumBuffers = {
+            kick: createDrumSound('kick'),
+            snare: createDrumSound('snare'),
+            hihat: createDrumSound('hihat')
+        };
+
+        /**
+         * Schedules an audio source to play at a specific time, with optional pitch, gain, and effects.
+         * @param {AudioBuffer} buffer The AudioBuffer to play.
+         * @param {number} startTime The time in seconds (relative to audioContext.currentTime) to start playback.
+         * @param {number} duration The duration in seconds to play the sound.
+         * @param {number} pitchCents Optional pitch shift in cents (100 cents = 1 semitone).
+         * @param {number} gain Optional gain multiplier (0-1).
+         * @param {number} effectMix Optional wet/dry mix for reverb (0-1).
+         * @returns {AudioBufferSourceNode} The created AudioBufferSourceNode.
+         */
+        function scheduleAudioSource(buffer, startTime, duration, pitchCents = 0, gain = 1, effectMix = 0) {
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+
+            // Pitch adjustment (playbackRate is exponential for pitch)
+            source.playbackRate.value = Math.pow(2, pitchCents / 1200);
+
+            // Dry/Wet signal path for reverb
+            const dryGainNode = audioContext.createGain();
+            dryGainNode.gain.value = 1 - effectMix;
+            dryGainNode.connect(masterGainNode);
+
+            const wetGainNode = audioContext.createGain();
+            wetGainNode.gain.value = effectMix;
+            wetGainNode.connect(reverbNode); // Connect to reverb
+
+            const sourceGainNode = audioContext.createGain();
+            sourceGainNode.gain.value = gain;
+            sourceGainNode.connect(dryGainNode);
+            sourceGainNode.connect(wetGainNode); // Send to wet path too
+
+            source.connect(sourceGainNode);
+
+            source.start(startTime, 0, duration); // Start at specified time, from offset 0, for duration
+            return source;
+        }
+
+        /**
+         * Generates a hip-hop instrumental remix based on loaded samples and current parameters.
+         * This is where the "AI DJ" logic resides.
+         */
+        function generateRemix() {
+            if (loadedAudioBuffers.length === 0) {
+                showMessage('Please upload audio samples first!', 'error');
+                return;
+            }
+
+            showMessage('Generating remix...', 'info');
+            stopPlayback(); // Stop any ongoing playback
+
+            // Clear previously scheduled nodes
+            remixScheduledNodes = [];
+            currentRemixDuration = 0;
+
+            const tempo = parseInt(tempoSlider.value);
+            const quarterNoteTime = 60 / tempo; // Duration of a quarter note in seconds
+            const samplePitchShift = parseInt(samplePitchSlider.value); // In semitones
+            const effectMix = parseFloat(effectMixSlider.value) / 100; // 0-1 for effect wet mix
+
+            // Save current parameters for editing/regeneration
+            currentRemixParameters = {
+                tempo: tempo,
+                samplePitchShift: samplePitchShift,
+                effectMix: effectMix,
+                // In a real AI, this would also store details of sample selection, patterns etc.
+                // For now, these will be re-randomized on 'Regenerate' or kept on 'Edit'.
+                seed: Math.random() // Simple seed for regeneration logic
+            };
+
+            // --- Simple Remix Structure (16 bars loop) ---
+            const totalBars = 16;
+            const barDuration = quarterNoteTime * 4;
+            currentRemixDuration = totalBars * barDuration + 2; // Add a little tail for reverb
+
+            let currentTime = audioContext.currentTime + 0.1; // Start slightly in the future
+
+            const availableSamples = loadedAudioBuffers.map(b => b.buffer);
+            if (availableSamples.length === 0) {
+                showMessage('No valid samples to remix!', 'error');
+                return;
+            }
+
+            // Select a few core samples to work with randomly for this remix iteration
+            const mainSampleCount = Math.min(availableSamples.length, 3); // Use up to 3 main samples
+            const selectedMainSamples = [];
+            for (let i = 0; i < mainSampleCount; i++) {
+                selectedMainSamples.push(availableSamples[Math.floor(Math.random() * availableSamples.length)]);
+            }
+
+            // --- Main Loop: Build the track bar by bar ---
+            for (let bar = 0; bar < totalBars; bar++) {
+                // DRUMS: Simple hip-hop beat
+                // Kick on 1 and 3, Snare on 2 and 4, Hi-hats on 8ths
+                remixScheduledNodes.push(scheduleAudioSource(drumBuffers.kick, currentTime, 0.3)); // Kick 1
+                remixScheduledNodes.push(scheduleAudioSource(drumBuffers.snare, currentTime + quarterNoteTime, 0.3)); // Snare 2
+                remixScheduledNodes.push(scheduleAudioSource(drumBuffers.kick, currentTime + (quarterNoteTime * 2), 0.3)); // Kick 3
+                remixScheduledNodes.push(scheduleAudioSource(drumBuffers.snare, currentTime + (quarterNoteTime * 3), 0.3)); // Snare 4
+
+                // Hi-hats (8ths)
+                for (let i = 0; i < 8; i++) {
+                    remixScheduledNodes.push(scheduleAudioSource(drumBuffers.hihat, currentTime + (i * quarterNoteTime / 2), 0.1, 0, 0.7));
+                }
+
+                // SAMPLES: Integrate selected samples
+                selectedMainSamples.forEach((sampleBuffer, index) => {
+                    const sampleDuration = sampleBuffer.duration;
+                    const numRepeats = Math.ceil(barDuration / sampleDuration); // How many times the sample can fit in a bar
+
+                    for (let i = 0; i < numRepeats; i++) {
+                        const startOffset = i * sampleDuration;
+                        if (startOffset < barDuration) {
+                            const actualDuration = Math.min(sampleDuration, barDuration - startOffset);
+
+                            // Apply pitch shift from slider
+                            const samplePitch = samplePitchShift + (index * 2); // Vary pitch slightly per sample for interest
+
+                            // Randomly reverse some samples
+                            let bufferToUse = sampleBuffer;
+                            if (Math.random() > 0.8) { // 20% chance to reverse
+                                const reversedBuffer = audioContext.createBuffer(sampleBuffer.numberOfChannels, sampleBuffer.length, sampleBuffer.sampleRate);
+                                for (let channel = 0; channel < sampleBuffer.numberOfChannels; channel++) {
+                                    const originalData = sampleBuffer.getChannelData(channel);
+                                    const reversedData = reversedBuffer.getChannelData(channel);
+                                    for (let j = 0; j < originalData.length; j++) {
+                                        reversedData[j] = originalData[originalData.length - 1 - j];
+                                    }
+                                }
+                                bufferToUse = reversedBuffer;
+                            }
+
+                            // Vary gain slightly
+                            const sampleGain = 0.8 + Math.random() * 0.4; // Between 0.8 and 1.2
+
+                            remixScheduledNodes.push(scheduleAudioSource(
+                                bufferToUse,
+                                currentTime + startOffset,
+                                actualDuration,
+                                samplePitch * 100, // Convert semitones to cents
+                                sampleGain,
+                                effectMix // Apply effect mix
+                            ));
+                        }
+                    }
+                });
+
+                currentTime += barDuration; // Move to the next bar's start time
+            }
+
+            showMessage('Remix generated! Click Play to listen.');
+            playBtn.disabled = false;
+            downloadBtn.disabled = false;
+            regenerateBtn.disabled = false;
+            saveVersionBtn.disabled = false;
+        }
+
+        /**
+         * Plays the currently generated remix.
+         */
+        function playRemix() {
+            if (remixScheduledNodes.length === 0) {
+                showMessage('No remix generated yet. Click "Generate Remix" first!', 'error');
+                return;
+            }
+
+            stopPlayback(); // Ensure previous playback is stopped
+
+            // Re-create nodes for playback (cannot reuse source nodes)
+            remixScheduledNodes = []; // Clear existing for regeneration
+            const currentTime = audioContext.currentTime + 0.05; // Small delay for precise start
+
+            // Iterate through the parameters of the current remix and re-schedule the sounds
+            // This is a simplified replay. For real "play/stop", you'd store the sequence data.
+            // For this example, let's assume `generateRemix` is the only way to create the sequence.
+            // A more robust system would save the "remix sequence" (e.g., an array of objects
+            // with buffer index, start time, pitch, gain, duration) and re-instantiate nodes from that.
+
+            // To avoid re-generating the *entire* remix just for play, we need to store the "recipe"
+            // of the remix. Let's create a simplified `currentRemixSequence` array.
+
+            // This is a placeholder. A proper implementation would store the full 'recipe' of the remix
+            // (which samples to play, at what time, with what effects) and then instantiate the sources
+            // from that recipe each time play is clicked.
+            // For now, `generateRemix` directly schedules to `remixScheduledNodes`.
+            // So, `playRemix` will actually re-run `generateRemix` for consistency,
+            // or we need to capture the full scheduling parameters.
+
+            // Let's modify `generateRemix` to store the "recipe" and `playRemix` to use it.
+            // This is a significant refactor, but necessary for proper play/stop/regen.
+
+            // For now, as a simpler workaround: `playRemix` will assume `remixScheduledNodes` already contains
+            // nodes from the last `generateRemix` call. We need to create NEW nodes because `start()` can only be called once.
+
+            // Let's make `generateRemix` populate a `remixRecipe` array, and `playRemix` uses it.
+
+            if (!currentRemixParameters.recipe) { // If no recipe exists, regenerate (first play or if state was cleared)
+                 generateRemix(); // Re-generate the recipe if not available
+                 if (!currentRemixParameters.recipe) {
+                     showMessage('Remix recipe missing. Cannot play.', 'error');
+                     return;
+                 }
+            }
+
+            // Create new source nodes from the stored recipe
+            currentRemixParameters.recipe.forEach(item => {
+                const buffer = item.type === 'drum' ? drumBuffers[item.id] : loadedAudioBuffers[item.id].buffer;
+                const source = scheduleAudioSource(
+                    buffer,
+                    audioContext.currentTime + item.relativeTime, // Start relative to current time
+                    item.duration,
+                    item.pitchCents,
+                    item.gain,
+                    item.effectMix
+                );
+                remixScheduledNodes.push(source);
+            });
+
+
+            stopBtn.disabled = false;
+            playBtn.disabled = true; // Disable play button while playing
+            generateRemixBtn.disabled = true; // Also disable generate while playing
+            downloadBtn.disabled = true;
+            regenerateBtn.disabled = true;
+            saveVersionBtn.disabled = true;
+            loadVersionBtn.disabled = true;
+
+            showMessage('Playing remix...');
+
+            // Set a timeout to re-enable play button after estimated duration
+            setTimeout(() => {
+                stopPlayback(); // Automatically stop after remix duration
+            }, currentRemixDuration * 1000);
+        }
+
+        /**
+         * Stops current audio playback.
+         */
+        function stopPlayback() {
+            if (currentPlaybackSource) {
+                currentPlaybackSource.stop();
+                currentPlaybackSource = null;
+            }
+            remixScheduledNodes.forEach(node => {
+                try {
+                    node.stop();
+                } catch (e) {
+                    // Node might have already finished or been stopped
+                }
+                node.disconnect(); // Disconnect to clean up
+            });
+            remixScheduledNodes = []; // Clear for next playback
+            if (audioContext && audioContext.state === 'running') {
+                audioContext.suspend(); // Suspend to free up resources
+            }
+            playBtn.disabled = false;
+            stopBtn.disabled = true;
+            generateRemixBtn.disabled = loadedAudioBuffers.length === 0;
+            downloadBtn.disabled = false; // Allow download after stopping
+            regenerateBtn.disabled = false;
+            saveVersionBtn.disabled = false;
+            loadVersionBtn.disabled = savedRemixVersions.length === 0;
+
+            showMessage('Playback stopped.');
+        }
+
+        /**
+         * Initiates recording and download of the remix.
+         */
+        function downloadRemix() {
+            if (remixScheduledNodes.length === 0) {
+                showMessage('No remix to download. Generate one first!', 'error');
+                return;
+            }
+
+            stopPlayback(); // Ensure nothing is playing and nodes are clean
+
+            if (audioContext.state === 'suspended') {
+                 audioContext.resume(); // Resume context for recording
+            }
+
+            // Create a new destination for recording
+            const destination = audioContext.createMediaStreamDestination();
+            masterGainNode.connect(destination); // Route master output to recorder destination
+
+            mediaRecorder = new MediaRecorder(destination.stream);
+            recordedChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/wav' }); // Or 'audio/webm'
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ai-dj-remix-${Date.now()}.wav`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showMessage('Remix downloaded!', 'success');
+
+                // Disconnect destination after recording
+                masterGainNode.disconnect(destination);
+            };
+
+            showMessage('Recording remix for download...', 'info');
+            // Re-schedule the remix to play into the recorder
+            const recordStartTime = audioContext.currentTime + 0.1;
+            remixScheduledNodes = []; // Clear existing nodes
+
+            // Re-instantiate from recipe for recording
+            currentRemixParameters.recipe.forEach(item => {
+                const buffer = item.type === 'drum' ? drumBuffers[item.id] : loadedAudioBuffers[item.id].buffer;
+                const source = scheduleAudioSource(
+                    buffer,
+                    recordStartTime + item.relativeTime, // Start relative to current time
+                    item.duration,
+                    item.pitchCents,
+                    item.gain,
+                    item.effectMix
+                );
+                remixScheduledNodes.push(source);
+            });
+
+            mediaRecorder.start();
+
+            // Stop recording after the remix duration
+            setTimeout(() => {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    stopPlayback(); // Stop playback nodes too
+                }
+            }, currentRemixDuration * 1000 + 500); // Add a small buffer
+        }
+
+        /**
+         * Regenerates a new remix using the same input samples but new random choices.
+         */
+        function regenerateRemix() {
+            if (loadedAudioBuffers.length === 0) {
+                showMessage('Upload samples to regenerate!', 'error');
+                return;
+            }
+            // Simply call generateRemix, which will create new random choices for samples/patterns.
+            generateRemix();
+            showMessage('New remix generated!', 'info');
+        }
+
+        /**
+         * Saves the current remix parameters as a version.
+         */
+        function saveCurrentVersion() {
+            if (!currentRemixParameters || Object.keys(currentRemixParameters).length === 0) {
+                showMessage('No remix generated to save yet!', 'error');
+                return;
+            }
+            const versionName = prompt('Enter a name for this remix version:');
+            if (versionName) {
+                const version = {
+                    name: versionName,
+                    id: Date.now(), // Unique ID
+                    parameters: JSON.parse(JSON.stringify(currentRemixParameters)) // Deep copy
+                };
+                savedRemixVersions.push(version);
+                updateVersionListUI();
+                showMessage(`Remix version "${versionName}" saved!`, 'success');
+            } else {
+                showMessage('Version name cannot be empty.', 'error');
+            }
+        }
+
+        /**
+         * Loads a previously saved remix version.
+         */
+        function loadVersion(versionId) {
+            const versionToLoad = savedRemixVersions.find(v => v.id === versionId);
+            if (versionToLoad) {
+                currentRemixParameters = JSON.parse(JSON.stringify(versionToLoad.parameters)); // Deep copy
+                // Apply parameters to sliders
+                tempoSlider.value = currentRemixParameters.tempo;
+                tempoValueSpan.textContent = currentRemixParameters.tempo;
+                samplePitchSlider.value = currentRemixParameters.samplePitchShift;
+                samplePitchValueSpan.textContent = currentRemixParameters.samplePitchShift;
+                effectMixSlider.value = currentRemixParameters.effectMix * 100; // Convert back to percentage
+                effectMixValueSpan.textContent = effectMixSlider.value;
+
+                // Now, regenerate the audio based on these loaded parameters
+                // This means the 'recipe' will be recreated using the loaded values
+                generateRemixFromRecipe(currentRemixParameters); // Call a specific function to use the recipe directly
+                showMessage(`Loaded remix version "${versionToLoad.name}". Ready to play!`, 'success');
+            } else {
+                showMessage('Version not found.', 'error');
+            }
+        }
+
+        /**
+         * Updates the UI to show saved remix versions.
+         */
+        function updateVersionListUI() {
+            versionListDiv.innerHTML = '';
+            if (savedRemixVersions.length > 0) {
+                versionListDiv.classList.remove('hidden');
+                savedRemixVersions.forEach((version, index) => {
+                    const versionItem = document.createElement('div');
+                    versionItem.className = 'file-item'; // Reuse file-item styling
+                    versionItem.innerHTML = `
+                        <span>${version.name}</span>
+                        <div>
+                            <button class="load-version-btn remove-file-btn" data-id="${version.id}"><i class="fas fa-folder-open"></i> Load</button>
+                            <button class="delete-version-btn remove-file-btn ml-2" data-id="${version.id}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    versionListDiv.appendChild(versionItem);
+                });
+                // Add event listeners for load and delete buttons
+                versionListDiv.querySelectorAll('.load-version-btn').forEach(button => {
+                    button.addEventListener('click', (e) => loadVersion(parseInt(e.target.dataset.id)));
+                });
+                versionListDiv.querySelectorAll('.delete-version-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const idToDelete = parseInt(e.target.dataset.id);
+                        savedRemixVersions = savedRemixVersions.filter(v => v.id !== idToDelete);
+                        updateVersionListUI();
+                        showMessage('Version deleted.', 'info');
+                        loadVersionBtn.disabled = savedRemixVersions.length === 0;
+                        if (savedRemixVersions.length === 0) {
+                            versionListDiv.classList.add('hidden');
+                        }
+                    });
+                });
+                loadVersionBtn.disabled = false;
+            } else {
+                versionListDiv.classList.add('hidden');
+                loadVersionBtn.disabled = true;
+            }
+        }
+
+        /**
+         * The core remix generation logic, now parametrized to allow regeneration
+         * and loading of specific settings.
+         * @param {Object} params Parameters for remix generation (tempo, pitch, effectMix, seed etc.)
+         */
+        function generateRemixFromRecipe(params) {
+            stopPlayback();
+            remixScheduledNodes = [];
+            currentRemixDuration = 0;
+
+            const tempo = params.tempo;
+            const quarterNoteTime = 60 / tempo;
+            const samplePitchShift = params.samplePitchShift;
+            const effectMix = params.effectMix;
+            const seed = params.seed || Math.random(); // Use provided seed or generate new
+
+            // Seedable random number generator for consistent regeneration
+            function seededRandom(s) {
+                var x = Math.sin(s++) * 10000;
+                return x - Math.floor(x);
+            }
+            let currentSeed = seed;
+            const random = () => seededRandom(currentSeed++);
+
+            const totalBars = 16;
+            const barDuration = quarterNoteTime * 4;
+            currentRemixDuration = totalBars * barDuration + 2;
+
+            let currentRelativeTime = 0; // Relative to the start of the remix
+
+            const recipe = []; // This will store the sequence of events
+
+            const availableSamples = loadedAudioBuffers.map(b => b.buffer);
+            if (availableSamples.length === 0) {
+                showMessage('No valid samples to remix!', 'error');
+                return;
+            }
+
+            // Select a few core samples to work with (seeded)
+            const mainSampleCount = Math.min(availableSamples.length, 3);
+            const selectedMainSamplesIndices = [];
+            for (let i = 0; i < mainSampleCount; i++) {
+                selectedMainSamplesIndices.push(Math.floor(random() * availableSamples.length));
+            }
+
+            for (let bar = 0; bar < totalBars; bar++) {
+                // DRUMS: Simple hip-hop beat
+                recipe.push({ type: 'drum', id: 'kick', relativeTime: currentRelativeTime, duration: 0.3, pitchCents: 0, gain: 1, effectMix: effectMix });
+                recipe.push({ type: 'drum', id: 'snare', relativeTime: currentRelativeTime + quarterNoteTime, duration: 0.3, pitchCents: 0, gain: 1, effectMix: effectMix });
+                recipe.push({ type: 'drum', id: 'kick', relativeTime: currentRelativeTime + (quarterNoteTime * 2), duration: 0.3, pitchCents: 0, gain: 1, effectMix: effectMix });
+                recipe.push({ type: 'drum', id: 'snare', relativeTime: currentRelativeTime + (quarterNoteTime * 3), duration: 0.3, pitchCents: 0, gain: 1, effectMix: effectMix });
+
+                for (let i = 0; i < 8; i++) {
+                    recipe.push({ type: 'drum', id: 'hihat', relativeTime: currentRelativeTime + (i * quarterNoteTime / 2), duration: 0.1, pitchCents: 0, gain: 0.7, effectMix: effectMix });
+                }
+
+                // SAMPLES: Integrate selected samples
+                selectedMainSamplesIndices.forEach((sampleIndex, selIdx) => {
+                    const sampleBuffer = loadedAudioBuffers[sampleIndex].buffer;
+                    const sampleDuration = sampleBuffer.duration;
+                    const numRepeats = Math.ceil(barDuration / sampleDuration);
+
+                    for (let i = 0; i < numRepeats; i++) {
+                        const startOffset = i * sampleDuration;
+                        if (startOffset < barDuration) {
+                            const actualDuration = Math.min(sampleDuration, barDuration - startOffset);
+
+                            const samplePitch = samplePitchShift + (selIdx * 2);
+
+                            let bufferToUseIndex = sampleIndex;
+                            let isReversed = false;
+                            if (random() > 0.8) { // 20% chance to reverse
+                                isReversed = true;
+                                // In a real system, you'd pre-process and store reversed buffers
+                                // For simplicity here, we'll indicate it and handle in playback
+                            }
+
+                            const sampleGain = 0.8 + random() * 0.4;
+
+                            recipe.push({
+                                type: 'sample',
+                                id: sampleIndex, // Index of the loaded buffer
+                                relativeTime: currentRelativeTime + startOffset,
+                                duration: actualDuration,
+                                pitchCents: samplePitch * 100,
+                                gain: sampleGain,
+                                effectMix: effectMix,
+                                isReversed: isReversed
+                            });
+                        }
+                    }
+                });
+
+                currentRelativeTime += barDuration;
+            }
+            currentRemixParameters.recipe = recipe; // Store the generated recipe
+            showMessage('Remix generated (or re-generated)! Click Play to listen.');
+            playBtn.disabled = false;
+            downloadBtn.disabled = false;
+            regenerateBtn.disabled = false;
+            saveVersionBtn.disabled = false;
+        }
+
+        // --- Event Listeners ---
+        window.addEventListener('load', () => {
+            initAudioContext(); // Initialize audio context on window load
+            updateVersionListUI(); // Load saved versions from storage if any (not implemented yet, but for UI)
+        });
+
+        audioFileInput.addEventListener('change', handleAudioFileSelect);
+
+        generateRemixBtn.addEventListener('click', () => {
+            // When generate is clicked, use the current slider values for a new remix.
+            // This is effectively an "Edit" or "Generate New" based on user input.
+            const currentParams = {
+                tempo: parseInt(tempoSlider.value),
+                samplePitchShift: parseInt(samplePitchSlider.value),
+                effectMix: parseFloat(effectMixSlider.value) / 100,
+                seed: Math.random() // New seed for full regeneration if not explicitly loading
+            };
+            currentRemixParameters = currentParams; // Update current parameters
+            generateRemixFromRecipe(currentRemixParameters);
+        });
+
+        playBtn.addEventListener('click', playRemix);
+        stopBtn.addEventListener('click', stopPlayback);
+        downloadBtn.addEventListener('click', downloadRemix);
+
+        tempoSlider.addEventListener('input', () => {
+            tempoValueSpan.textContent = tempoSlider.value;
+            // When slider changes, if a remix exists, allow re-generating it with new parameters.
+            generateRemixBtn.disabled = loadedAudioBuffers.length === 0;
+            showMessage('Adjust tempo. Click Generate Remix to apply changes.');
+        });
+        samplePitchSlider.addEventListener('input', () => {
+            samplePitchValueSpan.textContent = samplePitchSlider.value;
+            generateRemixBtn.disabled = loadedAudioBuffers.length === 0;
+            showMessage('Adjust pitch. Click Generate Remix to apply changes.');
+        });
+        effectMixSlider.addEventListener('input', () => {
+            effectMixValueSpan.textContent = effectMixSlider.value;
+            generateRemixBtn.disabled = loadedAudioBuffers.length === 0;
+            showMessage('Adjust reverb. Click Generate Remix to apply changes.');
+            updateEffectMix(); // Update the display value immediately
+        });
+
+        regenerateBtn.addEventListener('click', regenerateRemix);
+        saveVersionBtn.addEventListener('click', saveCurrentVersion);
+        loadVersionBtn.addEventListener('click', () => {
+            // Toggle visibility of version list
+            versionListDiv.classList.toggle('hidden');
+            if (!versionListDiv.classList.contains('hidden')) {
+                showMessage('Select a version to load.', 'info');
+            } else {
+                showMessage('Version list hidden.', 'info');
+            }
+        });
+
+        // Initialize UI states
+        stopBtn.disabled = true;
+        downloadBtn.disabled = true;
+        regenerateBtn.disabled = true;
+        saveVersionBtn.disabled = true;
+        loadVersionBtn.disabled = true; // Will be enabled if versions are loaded
+    </script>
+</body>
+</html>

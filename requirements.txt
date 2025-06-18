@@ -1,0 +1,5 @@
+flask
+flask-cors
+pip install -r requirements.txtyt-dlp
+spleeter
+ffmpeg-python
