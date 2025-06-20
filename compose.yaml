@@ -1,0 +1,29 @@
+services:
+  python-app:
+    build:
+      context: ./flask_app
+      dockerfile: Dockerfile
+    image: remixer-python-app
+    container_name: remixer-python-app
+    restart: unless-stopped
+    init: true
+    ports:
+      - "8080:8080"
+    networks:
+      - remixnet
+
+  static-frontend:
+    build: ./static_site
+    image: remixer-static-frontend
+    container_name: remixer-static-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - remixnet
+    depends_on:
+      - python-app
+
+networks:
+  remixnet:
+    driver: bridge

@@ -1,5 +1,6 @@
 # Python virtual environments
 remixed_ai_amv_py38.venv/ # Explicitly ignore your venv folder
+DJ.venv/
 # You can uncomment and use these general ones if you create other venvs with different naming conventions in the future:
 # .venv/
 # env/
