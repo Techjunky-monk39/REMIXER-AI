@@ -1,6 +1,6 @@
 import io
 import unittest
-docker compose up --buildfrom unittest.mock import patch
+from unittest.mock import patch
 from flask_app.app import app
 
 class AppTestCase(unittest.TestCase):
