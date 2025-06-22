@@ -1,0 +1,12 @@
+/* Externalized styles for static_site/index.html */
+.input-url {
+    width: 70%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #63b3ed;
+    background: #2d3748;
+    color: #e2e8f0;
+}
+.submit-url-btn {
+    margin-left: 10px;
+}
