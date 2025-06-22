@@ -1,10 +1,14 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
+import logging
 from flask_app.yt_audio_downloader import download_youtube_audio
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from your frontend
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -46,5 +50,19 @@ def process_url():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+# Health check endpoint for Cloud Run
+@app.route('/healthz')
+def healthz():
+    return jsonify({'status': 'ok'}), 200
+
+# Robust error handlers
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'error': 'Not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({'error': 'Internal server error'}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)

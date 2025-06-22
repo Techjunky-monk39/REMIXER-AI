@@ -2,11 +2,14 @@
 
 FROM python:3.8.10-slim AS base
 
+# Update system packages for security
+RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 FROM base AS builder
 
-COPY --link requirements.txt ./
+COPY --link flask_app/requirements.txt ./
 ENV PIP_CACHE_DIR=/root/.cache/pip
 
 RUN --mount=type=cache,target=$PIP_CACHE_DIR \
@@ -14,7 +17,11 @@ RUN --mount=type=cache,target=$PIP_CACHE_DIR \
     .venv/bin/pip install --upgrade pip && \
     .venv/bin/pip install -r requirements.txt
 
-COPY --link . .
+# Explicitly copy flask_app directory and all code
+COPY --link flask_app ./flask_app
+COPY --link app.py ./
+COPY --link __main__.py ./
+COPY --link __init__.py ./
 
 FROM base AS final
 
