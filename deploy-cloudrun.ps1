@@ -1,3 +1,32 @@
+# REMIXER-AI Cloud Production Deployment Script
+#
+# This script builds and deploys the REMIXER-AI application to Google Cloud Run (production environment).
+#
+# Usage:
+#   1. Ensure Docker Desktop and Google Cloud SDK (gcloud) are installed and running.
+#   2. Run this script in PowerShell: ./deploy-cloudrun.ps1
+#
+# What it does:
+#   - Builds and pushes backend and frontend Docker images (with :latest tags).
+#   - Deploys both services to Google Cloud Run (production environment).
+#   - Updates the frontend .env with the backend production URL.
+#   - Performs health checks and exits with a clear error if any step fails.
+#
+# For staging deployment, use deploy-staging.ps1.
+#
+# Author: [Your Name]
+# Date: 2025-06-22
+#
+# ---
+#
+# To automate deployment, you can schedule this script to run via Windows Task Scheduler or a CI/CD pipeline.
+# Example (Task Scheduler):
+#   - Action: Start a program
+#   - Program/script: powershell.exe
+#   - Add arguments: -ExecutionPolicy Bypass -File "C:\path\to\REMIXER-AI\deploy-cloudrun.ps1"
+#
+# ---
+
 # PowerShell script to build, push, and deploy both backend and frontend to Google Cloud Run
 
 # Check if Docker is running
