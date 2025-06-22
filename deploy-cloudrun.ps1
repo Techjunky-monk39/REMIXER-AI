@@ -1,5 +1,14 @@
 # PowerShell script to build, push, and deploy both backend and frontend to Google Cloud Run
 
+# Ensure all changes are committed and pushed before deployment
+git add .
+if (-not [string]::IsNullOrWhiteSpace((git status --porcelain))) {
+    git commit -m "chore: auto-commit before deploy"
+    git push
+} else {
+    Write-Host "No changes to commit."
+}
+
 # Check if Docker is running
 try {
     docker info | Out-Null
@@ -56,3 +65,34 @@ gcloud run deploy $frontend_service --image=$frontend_image --platform=managed -
 $frontend_url = gcloud run services describe $frontend_service --platform=managed --region=$region --format="value(status.url)"
 Write-Host "Your frontend is live at: $frontend_url"
 Write-Host "You can open this URL on your phone or any device."
+
+# Health checks for backend and frontend
+Write-Host "\nPerforming health checks..."
+
+# Check backend health
+try {
+    $backend_health = Invoke-WebRequest "$backend_url/healthz" -UseBasicParsing -TimeoutSec 10
+    if ($backend_health.StatusCode -eq 200) {
+        Write-Host "Backend health check: OK" -ForegroundColor Green
+    } else {
+        Write-Host "Backend health check: FAILED (status $($backend_health.StatusCode))" -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "Backend health check: FAILED (exception)" -ForegroundColor Red
+    exit 1
+}
+
+# Check frontend
+try {
+    $frontend_status = Invoke-WebRequest "$frontend_url" -UseBasicParsing -TimeoutSec 10
+    if ($frontend_status.StatusCode -eq 200) {
+        Write-Host "Frontend check: OK" -ForegroundColor Green
+    } else {
+        Write-Host "Frontend check: FAILED (status $($frontend_status.StatusCode))" -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "Frontend check: FAILED (exception)" -ForegroundColor Red
+    exit 1
+}

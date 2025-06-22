@@ -33,9 +33,10 @@ COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/ /app/
 
 ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH=/app
 
 USER appuser
 
 EXPOSE 8080
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "flask_app.app:app"]
