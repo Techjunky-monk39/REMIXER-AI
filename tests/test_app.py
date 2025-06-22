@@ -48,7 +48,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn(b'No URL provided', response.data)
 
-    @patch('app.download_youtube_audio')
+    @patch('flask_app.app.download_youtube_audio')
     def test_process_url_success(self, mock_download):
         mock_download.return_value = 'mockfile.mp3'
         response = self.app.post('/process_url', json={'url': 'http://youtube.com/fake'})
@@ -56,7 +56,7 @@ class AppTestCase(unittest.TestCase):
         self.assertIn(b'Audio downloaded successfully', response.data)
         self.assertIn(b'mockfile.mp3', response.data)
 
-    @patch('app.download_youtube_audio')
+    @patch('flask_app.app.download_youtube_audio')
     def test_process_url_failure(self, mock_download):
         mock_download.return_value = None
         response = self.app.post('/process_url', json={'url': 'http://youtube.com/fake'})
