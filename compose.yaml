@@ -1,8 +1,8 @@
 services:
   python-app:
     build:
-      context: ./flask_app
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: flask_app/Dockerfile
     image: remixer-python-app
     container_name: remixer-python-app
     restart: unless-stopped
