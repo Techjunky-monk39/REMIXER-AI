@@ -19,4 +19,9 @@ function App() {
   );
 }
 
+// Healthz endpoint for uptime monitoring
+export function Healthz() {
+  return new Response('OK', { status: 200 });
+}
+
 export default App;
