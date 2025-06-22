@@ -32,6 +32,8 @@ COPY --from=builder /app/ /app/
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
 
+RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app/uploads
+
 USER appuser
 
 EXPOSE 8080
