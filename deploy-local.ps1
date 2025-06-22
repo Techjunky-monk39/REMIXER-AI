@@ -1,20 +1,42 @@
 # PowerShell script to clean, build, and deploy all services locally with Docker Compose
 
-Write-Host "Cleaning up old containers and images..."
-docker compose down --volumes --remove-orphans
+# Check if Docker is running
+try {
+    docker info | Out-Null
+} catch {
+    Write-Host "ERROR: Docker Desktop is not running. Please start Docker Desktop and try again." -ForegroundColor Red
+    exit 1
+}
 
-docker system prune -f
+Write-Host "Cleaning up old containers and images..."
+try {
+    docker compose down --volumes --remove-orphans
+    docker system prune -f
+} catch {
+    Write-Host "ERROR: Docker cleanup failed." -ForegroundColor Red
+    exit 1
+}
 
 git add .
 if (-not [string]::IsNullOrWhiteSpace((git status --porcelain))) {
-    git commit -m "chore: auto-commit before local deploy"
-    git push
+    try {
+        git commit -m "chore: auto-commit before local deploy"
+        git push
+    } catch {
+        Write-Host "ERROR: Git commit or push failed." -ForegroundColor Red
+        exit 1
+    }
 } else {
     Write-Host "No changes to commit."
 }
 
 Write-Host "Building and starting all services with Docker Compose..."
-docker compose up --build -d
+try {
+    docker compose up --build -d
+} catch {
+    Write-Host "ERROR: Docker Compose up failed." -ForegroundColor Red
+    exit 1
+}
 
 Start-Sleep -Seconds 10
 
@@ -68,3 +90,4 @@ Write-Host "\nAll services are up and healthy!"
 Write-Host "Backend:   http://localhost:8080"
 Write-Host "Frontend:  http://localhost:3001"
 Write-Host "Static:    http://localhost:3000"
+# End of script
