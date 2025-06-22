@@ -1,0 +1,45 @@
+# Cloud Build config for building and deploying both backend and frontend to Cloud Run
+# Assumes the following structure:
+# - flask_app/Dockerfile (backend)
+# - frontend/Dockerfile (frontend)
+#
+# Set these variables to match your project and region
+substitutions:
+  _REGION: us-east1
+  _PROJECT: remixer-ai
+  _REPO: remixer-repo
+
+steps:
+# Build and push backend image
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', '$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/flask-app:latest', '-f', 'flask_app/Dockerfile', '.' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'push', '$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/flask-app:latest' ]
+
+# Deploy backend to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    [ 'run', 'deploy', 'flask-app',
+      '--image=$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/flask-app:latest',
+      '--platform=managed',
+      '--region=$_REGION',
+      '--allow-unauthenticated' ]
+
+# Build and push frontend image
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', '$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/frontend:latest', '-f', 'frontend/Dockerfile', 'frontend' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'push', '$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/frontend:latest' ]
+
+# Deploy frontend to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    [ 'run', 'deploy', 'frontend',
+      '--image=$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/frontend:latest',
+      '--platform=managed',
+      '--region=$_REGION',
+      '--allow-unauthenticated' ]
+
+timeout: 1800s
