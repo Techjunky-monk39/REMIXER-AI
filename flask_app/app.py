@@ -1,4 +1,5 @@
-a# Deployment trigger: minor comment update for Cloud Build
+# Deployment trigger: minor comment update for Cloud Build
+# Deployment trigger: minor comment update for Cloud Build
 # Date: 2025-06-22
 # This comment is used to trigger a new deployment via GitHub push.
 
