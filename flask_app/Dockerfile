@@ -19,9 +19,6 @@ RUN --mount=type=cache,target=$PIP_CACHE_DIR \
 
 # Explicitly copy flask_app directory and all code
 COPY --link flask_app ./flask_app
-COPY --link app.py ./
-COPY --link __main__.py ./
-COPY --link __init__.py ./
 
 FROM base AS final
 
