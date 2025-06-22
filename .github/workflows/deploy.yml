@@ -1,0 +1,56 @@
+# GitHub Actions workflow for REMIXER-AI: Manual Deploy to Staging or Production
+#
+# This workflow lets you deploy to staging or production from the GitHub Actions web UI.
+#
+# Usage:
+#   - Go to the Actions tab in GitHub, select this workflow, and click "Run workflow".
+#   - Choose staging or production as the environment.
+#
+# Prerequisites:
+#   - Set up GCP_PROJECT_ID and GCP_SA_KEY as GitHub secrets.
+#   - Your deploy-staging.ps1 and deploy-cloudrun.ps1 scripts must work on Ubuntu/PowerShell Core.
+
+name: Manual Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy to staging or production?'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate Docker to Google Cloud
+        run: gcloud auth configure-docker
+
+      - name: Install PowerShell
+        run: sudo apt-get install -y powershell
+
+      - name: Deploy to selected environment
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            pwsh ./deploy-cloudrun.ps1
+          else
+            pwsh ./deploy-staging.ps1
+          fi
