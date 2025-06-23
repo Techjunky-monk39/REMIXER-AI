@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 import logging
-from flask_app.yt_audio_downloader import download_youtube_audio
+from flask_app.audio_processor import download_youtube_audio, separate_audio
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from your frontend
@@ -28,10 +28,27 @@ def upload_audio():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    original_filename = file.filename
+    filepath = os.path.join(UPLOAD_FOLDER, original_filename)
     file.save(filepath)
-    # TODO: Call your audio processing here
-    return jsonify({'message': 'File uploaded', 'filename': file.filename})
+
+    # Define output directory for separated files
+    filename_without_ext = os.path.splitext(original_filename)[0]
+    separation_output_dir = os.path.join(UPLOAD_FOLDER, filename_without_ext)
+    os.makedirs(separation_output_dir, exist_ok=True)
+
+    vocals_path, accompaniment_path = separate_audio(filepath, separation_output_dir)
+
+    if vocals_path and accompaniment_path:
+        return jsonify({
+            'message': 'File uploaded and processed successfully',
+            'original_filename': original_filename,
+            'vocals_path': os.path.relpath(vocals_path, UPLOAD_FOLDER).replace('\\', '/'),
+            'accompaniment_path': os.path.relpath(accompaniment_path, UPLOAD_FOLDER).replace('\\', '/')
+        })
+    else:
+        return jsonify({'error': 'Failed to process audio'}), 500
 
 @app.route('/process', methods=['POST'])
 def process_audio():
@@ -46,13 +63,53 @@ def process_url():
     if not url:
         return jsonify({'error': 'No URL provided'}), 400
     try:
-        filename = download_youtube_audio(url, output_path=UPLOAD_FOLDER)
-        if filename:
-            return jsonify({'message': f'Audio downloaded successfully!', 'filename': filename})
+        downloaded_audio_filepath = download_youtube_audio(url, output_path=UPLOAD_FOLDER)
+        if downloaded_audio_filepath:
+            app.logger.info(f"Audio downloaded: {downloaded_audio_filepath}")
+
+            original_filename = os.path.basename(downloaded_audio_filepath)
+            filename_without_ext = os.path.splitext(original_filename)[0]
+            separation_output_dir = os.path.join(UPLOAD_FOLDER, filename_without_ext)
+            os.makedirs(separation_output_dir, exist_ok=True)
+
+            vocals_path, accompaniment_path = separate_audio(downloaded_audio_filepath, separation_output_dir)
+
+            if vocals_path and accompaniment_path:
+                return jsonify({
+                    'message': 'Audio downloaded and processed successfully!',
+                    'original_filename': original_filename,
+                    'vocals_path': os.path.relpath(vocals_path, UPLOAD_FOLDER).replace('\\', '/'),
+                    'accompaniment_path': os.path.relpath(accompaniment_path, UPLOAD_FOLDER).replace('\\', '/')
+                })
+            else:
+                app.logger.error(f"Failed to separate audio for {downloaded_audio_filepath}")
+                return jsonify({'error': 'Failed to process audio after download'}), 500
         else:
+            app.logger.error(f"Failed to download audio from URL: {url}")
             return jsonify({'error': 'Failed to download audio.'}), 500
     except Exception as e:
+        app.logger.error(f"Error processing URL {url}: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/download_separated/<path:filepath>')
+def download_separated_file(filepath):
+    # Construct the full path to the file
+    # The `filepath` received from the URL will be e.g., "original_filename_without_ext/vocals.wav"
+    # We need to join it with our actual UPLOAD_FOLDER
+    # UPLOAD_FOLDER is 'uploads'
+    # So, full_path will be 'uploads/original_filename_without_ext/vocals.wav'
+    full_path = os.path.join(UPLOAD_FOLDER, filepath)
+    app.logger.info(f"Attempting to send file from: {full_path}")
+
+    if not os.path.exists(full_path) or not os.path.isfile(full_path):
+        app.logger.error(f"File not found or is not a file: {full_path}")
+        return jsonify({'error': 'File not found'}), 404
+
+    try:
+        return send_file(full_path, as_attachment=True)
+    except Exception as e:
+        app.logger.error(f"Error sending file {full_path}: {str(e)}")
+        return jsonify({'error': 'Could not send file'}), 500
 
 # Health check endpoint for Cloud Run
 @app.route('/healthz')
