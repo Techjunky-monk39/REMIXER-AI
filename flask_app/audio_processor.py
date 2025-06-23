@@ -63,8 +63,8 @@ def separate_audio(audio_file_path, output_dir='output'):
     # Check if the audio file exists before processing
     if not os.path.exists(audio_file_path):
         print(f"Error: Cannot find the file '{audio_file_path}'.")
-        print("Please make sure the file name is correct and it's in the same directory.")
-        return
+        # Return None or raise an exception to indicate failure
+        return None, None
 
     try:
         # Spleeter can be very verbose; this reduces the log noise.
@@ -87,12 +87,16 @@ def separate_audio(audio_file_path, output_dir='output'):
         print("\n-------------------------------------------")
         print("Separation Complete!")
         print(f"Files saved in: '{full_output_path}'")
-        print(f"  - Vocals:     vocals.wav")
-        print(f"  - Instrumental: accompaniment.wav")
+        vocals_path = os.path.join(full_output_path, "vocals.wav")
+        accompaniment_path = os.path.join(full_output_path, "accompaniment.wav")
+        print(f"  - Vocals:     {vocals_path}")
+        print(f"  - Instrumental: {accompaniment_path}")
         print("-------------------------------------------")
+        return vocals_path, accompaniment_path
 
     except Exception as e:
         print(f"An error occurred during the separation process: {e}")
+        return None, None
 
 
 if __name__ == '__main__':
