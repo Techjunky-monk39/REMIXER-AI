@@ -7,6 +7,7 @@ from flask_cors import CORS
 import os
 import logging
 from flask_app.yt_audio_downloader import download_youtube_audio
+from .audio_separator import separate_audio
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from your frontend
@@ -31,10 +32,27 @@ def upload_audio():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(filepath)
-    # TODO: Call your audio processing here
-    return jsonify({'message': 'File uploaded', 'filename': file.filename})
+    # Call the audio separation function
+    output_dir = os.path.join(OUTPUT_FOLDER, os.path.splitext(file.filename)[0])
+    os.makedirs(output_dir, exist_ok=True)
+    separate_audio(filepath, output_dir)
+    # Optionally, list the output files for download
+    stems = os.listdir(output_dir)
+    stem_urls = [
+        f"/download/{os.path.splitext(file.filename)[0]}/{stem}"
+        for stem in stems
+    ]
+    return jsonify({
+        'message': 'File uploaded and split!',
+        'stems': stem_urls
+    })
+
+@app.route('/download/<stem_folder>/<filename>')
+def download_stem(stem_folder, filename):
+    dir_path = os.path.join(OUTPUT_FOLDER, stem_folder)
+    return send_from_directory(dir_path, filename, as_attachment=True)
 
 @app.route('/process', methods=['POST'])
 def process_audio():
