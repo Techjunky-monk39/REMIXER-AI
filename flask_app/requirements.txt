@@ -4,3 +4,4 @@ yt-dlp
 spleeter
 ffmpeg-python
 gunicorn
+numpy==1.18.5

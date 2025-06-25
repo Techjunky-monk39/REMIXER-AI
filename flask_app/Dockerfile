@@ -15,27 +15,17 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy requirements and install
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY ./flask_app/requirements.txt .
+RUN apt-get update && apt-get install -y build-essential \
+    && pip install --upgrade pip \
+    && pip install numpy==1.18.5 \
+    && pip install -r requirements.txt
 
 # Copy app code
-COPY . .
+COPY ./flask_app/. .
 
 # Expose port
 EXPOSE 8080
 
 # Run the Flask app
 CMD ["python", "app.py"]
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/ /app/
-
-ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONPATH=/app
-
-RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app/uploads
-
-USER appuser
-
-EXPOSE 8080
-
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "flask_app.app:app"]
