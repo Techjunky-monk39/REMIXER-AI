@@ -7,6 +7,7 @@ from flask_cors import CORS
 import os
 import logging
 from .audio_separator import separate_audio
+from flask_app.yt_audio_downloader import download_youtube_audio
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from your frontend
