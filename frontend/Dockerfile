@@ -1,14 +1,22 @@
 # Simple React frontend Dockerfile
-FROM node:20-alpine3.19 AS build
+FROM node:18-alpine as build
+
 WORKDIR /app
-COPY package.json ./
-RUN apk update && apk upgrade --no-cache && npm install
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
 COPY . .
+
+# Build the frontend
 RUN npm run build
 
+# Serve with a lightweight web server
 FROM nginx:alpine
-# Use custom nginx.conf to ensure port 8080 is used
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build /usr/share/nginx/html
-EXPOSE 8080
+
+EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]

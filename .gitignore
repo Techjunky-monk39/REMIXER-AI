@@ -6,6 +6,10 @@ DJ.venv/
 # env/
 # venv/
 
+# Node modules and other dependencies
+node_modules/
+uploads/
+
 # Byte-code files
 *.pyc
 __pycache__/

@@ -44,7 +44,6 @@ def separate_audio(audio_file_path, output_dir='output'):
     except Exception as e:
         print(f"An error occurred during the separation process: {e}")
 
-
 if __name__ == '__main__':
     # --- USAGE ---
     # 1. Make sure 'youtube_audio_extractor.py' has been run successfully.

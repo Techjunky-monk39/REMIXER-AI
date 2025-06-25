@@ -1,31 +1,31 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.8.10-slim AS base
+FROM python:3.10-slim
 
-# Update system packages for security
-RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y ffmpeg git && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set work directory
 WORKDIR /app
 
-FROM base AS builder
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY --link flask_app/requirements.txt ./
-ENV PIP_CACHE_DIR=/root/.cache/pip
+# Copy app code
+COPY . .
 
-RUN --mount=type=cache,target=$PIP_CACHE_DIR \
-    python -m venv .venv && \
-    .venv/bin/pip install --upgrade pip && \
-    .venv/bin/pip install -r requirements.txt
+# Expose port
+EXPOSE 8080
 
-# Explicitly copy flask_app directory and all code
-COPY --link flask_app ./flask_app
-
-FROM base AS final
-
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-
-WORKDIR /app
-
+# Run the Flask app
+CMD ["python", "app.py"]
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/ /app/
 
