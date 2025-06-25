@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import os
 import logging
-from .audio_separator import separate_audio
+from audio_separator import separate_audio
 from flask_app.yt_audio_downloader import download_youtube_audio
 
 app = Flask(__name__)
