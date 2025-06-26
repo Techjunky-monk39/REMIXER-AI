@@ -5,7 +5,7 @@
 #
 # Set these variables to match your project and region
 substitutions:
-  _REGION: us-east1
+  _REGION: us-central1
   _PROJECT: remixer-ai
   _REPO: remixer-repo
 
@@ -24,7 +24,25 @@ steps:
       '--image=$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/flask-app:latest',
       '--platform=managed',
       '--region=$_REGION',
-      '--allow-unauthenticated' ]
+      '--allow-unauthenticated',
+      '--port=8080',
+      '--max-instances=1',
+      '--timeout=900',
+      '--memory=1Gi',
+      '--cpu=1',
+      '--set-env-vars=PYTHONUNBUFFERED=1',
+      '--add-cloudsql-instances=',
+      '--ingress=all',
+      '--min-instances=0',
+      '--max-instances=1',
+      '--no-cpu-throttling',
+      '--service-account=',
+      '--update-env-vars=GUNICORN_CMD_ARGS=--timeout=120',
+      '--exec-health-check-path=/health',
+      '--exec-health-check-interval=30s',
+      '--exec-health-check-timeout=5s',
+      '--exec-health-check-unhealthy-threshold=3',
+      '--exec-health-check-healthy-threshold=1' ]
 
 # Build and push frontend image
 - name: 'gcr.io/cloud-builders/docker'
@@ -40,6 +58,20 @@ steps:
       '--image=$_REGION-docker.pkg.dev/$_PROJECT/$_REPO/frontend:latest',
       '--platform=managed',
       '--region=$_REGION',
-      '--allow-unauthenticated' ]
+      '--allow-unauthenticated',
+      '--port=8080',
+      '--max-instances=1',
+      '--timeout=900',
+      '--memory=512Mi',
+      '--cpu=1',
+      '--ingress=all',
+      '--min-instances=0',
+      '--max-instances=1',
+      '--no-cpu-throttling',
+      '--exec-health-check-path=/health',
+      '--exec-health-check-interval=30s',
+      '--exec-health-check-timeout=5s',
+      '--exec-health-check-unhealthy-threshold=3',
+      '--exec-health-check-healthy-threshold=1' ]
 
 timeout: 1800s
