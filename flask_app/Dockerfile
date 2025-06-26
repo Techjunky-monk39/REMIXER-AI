@@ -15,11 +15,11 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy requirements and install dependencies
-COPY ./flask_app/requirements.txt .
+COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy app code
-COPY ./flask_app/. .
+COPY . .
 
 # Create a non-root user for security
 RUN useradd -m appuser && chown -R appuser /app

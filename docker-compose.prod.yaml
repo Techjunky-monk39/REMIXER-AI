@@ -1,11 +1,11 @@
 version: '3.8'
 services:
-  python-app:
+  flask-app:
     build:
       context: ./flask_app
       target: final
-    image: remixer-python-app
-    container_name: remixer-python-app
+    image: flask-app
+    container_name: flask-app
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -14,17 +14,19 @@ services:
     networks:
       - remixnet
 
-  static-frontend:
-    build: ./static_site
-    image: remixer-static-frontend
-    container_name: remixer-static-frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: frontend
+    container_name: frontend
     restart: unless-stopped
     ports:
       - "3000:80"
     networks:
       - remixnet
     depends_on:
-      - python-app
+      - flask-app
 
 networks:
   remixnet:

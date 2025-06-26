@@ -13,8 +13,7 @@ services:
       - remixnet
 
   static-frontend:
-    build: ./static_site
-    image: remixer-static-frontend
+    image: nginx:alpine
     container_name: remixer-static-frontend
     restart: unless-stopped
     ports:
