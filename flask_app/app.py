@@ -8,6 +8,7 @@ import os
 import logging
 from audio_separator import separate_audio
 from flask_app.yt_audio_downloader import download_youtube_audio
+from audio_processor import process_remix
 
 app = Flask(__name__)
 CORS(app)  # Allow requests from your frontend
@@ -57,8 +58,33 @@ def download_stem(stem_folder, filename):
 @app.route('/process', methods=['POST'])
 def process_audio():
     data = request.json
-    # TODO: Call your audio_processor.py or other logic here
-    return jsonify({'message': 'Processing started', 'params': data})
+    # Expecting: {"vocals_path": ..., "accompaniment_path": ..., "tempo": ..., "pitch": ..., "reverb": ...}
+    vocals_path = data.get('vocals_path')
+    accompaniment_path = data.get('accompaniment_path')
+    tempo = float(data.get('tempo', 1.0))
+    pitch = float(data.get('pitch', 0))
+    reverb = float(data.get('reverb', 0.0))
+    output_dir = OUTPUT_FOLDER
+
+    if not vocals_path or not accompaniment_path:
+        return jsonify({'error': 'Missing vocals or accompaniment path'}), 400
+
+    # Convert relative to absolute paths if needed
+    vocals_abs = vocals_path if os.path.isabs(vocals_path) else os.path.join(output_dir, vocals_path)
+    acc_abs = accompaniment_path if os.path.isabs(accompaniment_path) else os.path.join(output_dir, accompaniment_path)
+    remix_output_dir = os.path.dirname(vocals_abs)
+
+    try:
+        remix_path = process_remix(vocals_abs, acc_abs, remix_output_dir, tempo=tempo, pitch=pitch, reverb=reverb)
+        if remix_path and os.path.exists(remix_path):
+            # Return a download link relative to the output folder
+            remix_rel = os.path.relpath(remix_path, OUTPUT_FOLDER).replace('\\', '/')
+            return jsonify({'message': 'Remix created!', 'remix_url': f"/download/{remix_rel}"})
+        else:
+            return jsonify({'error': 'Remix failed'}), 500
+    except Exception as e:
+        app.logger.error(f"Remix error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/process_url', methods=['POST'])
 def process_url():
