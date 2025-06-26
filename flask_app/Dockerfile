@@ -16,13 +16,20 @@ WORKDIR /app
 
 # Copy requirements and install
 COPY ./flask_app/requirements.txt .
-RUN pip install --upgrade pip && pip install numpy==1.18.5 && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy app code
 COPY ./flask_app/. .
 
+# Create a non-root user for security
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
 # Expose port
 EXPOSE 8080
+
+# Healthcheck for container stability
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -f http://localhost:8080/healthz || exit 1
 
 # Run the Flask app
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
