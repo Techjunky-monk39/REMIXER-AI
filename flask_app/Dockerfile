@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.8.10-slim
+FROM python:3.8.10-slim AS final
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -15,11 +15,11 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy requirements and install dependencies
-COPY requirements.txt .
+COPY flask_app/requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy app code
-COPY . .
+COPY flask_app/. .
 
 # Create a non-root user for security
 RUN useradd -m appuser && chown -R appuser /app

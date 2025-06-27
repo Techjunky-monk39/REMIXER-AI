@@ -11,8 +11,8 @@ import sys
 import time
 
 # Names must match those in your compose files
-CONTAINERS = ["remixer-python-app", "remixer-static-frontend"]
-IMAGES = ["remixer-python-app", "remixer-static-frontend"]
+CONTAINERS = ["remixer-flask-app", "remixer-static-frontend"]
+IMAGES = ["remixer-flask-app", "remixer-static-frontend"]
 COMPOSE_FILE = "docker-compose.prod.yaml"
 
 

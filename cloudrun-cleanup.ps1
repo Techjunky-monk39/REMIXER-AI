@@ -1,6 +1,6 @@
 # PowerShell script to delete all Cloud Run services in a region for the current project
 
-$region = "us-east1"
+$region = "us-central1"
 
 # List all Cloud Run services in the region
 $services = gcloud run services list --platform=managed --region=$region --format="value(metadata.name)"

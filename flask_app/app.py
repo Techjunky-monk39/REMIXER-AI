@@ -7,7 +7,7 @@ from flask_cors import CORS
 import os
 import logging
 from audio_separator import separate_audio
-from flask_app.yt_audio_downloader import download_youtube_audio
+from yt_audio_downloader import download_youtube_audio  # <-- FIXED: removed flask_app. prefix
 from audio_processor import process_remix
 
 app = Flask(__name__)

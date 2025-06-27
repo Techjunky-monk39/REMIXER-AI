@@ -4,29 +4,17 @@
 
 set -e
 
-# Stop and remove containers with names matching 'remixer-python-app' or 'remixer-static-frontend'
-containers=$(docker ps -a --filter "name=remixer-python-app" --filter "name=remixer-static-frontend" --format "{{.ID}}")
-if [ ! -z "$containers" ]; then
-    echo "Stopping and removing containers: $containers"
-    for c in $containers; do
-        docker stop $c
-        docker rm $c
-    done
-fi
+echo "Stopping and removing all containers for REMIXER-AI..."
+docker compose -f docker-compose.prod.yaml down -v --remove-orphans || true
 
-# Remove images named 'remixer-python-app' or 'remixer-static-frontend'
-images=$(docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep -E 'remixer-python-app|remixer-static-frontend' | awk '{print $2}')
-if [ ! -z "$images" ]; then
-    echo "Removing images: $images"
-    for i in $images; do
-        docker rmi -f $i
-    done
-fi
+echo "Removing old images..."
+docker rmi remixer-flask-app:latest remixer-static-frontend:latest || true
 
-# Prune unused Docker resources (optional, uncomment if you want a full cleanup)
-# docker system prune -f
+echo "Pruning unused Docker resources..."
+docker system prune -af || true
 
-# Build and deploy with Docker Compose (production)
-echo "Building and starting Docker Compose (production)..."
-docker compose -f docker-compose.prod.yaml build --no-cache
-docker compose -f docker-compose.prod.yaml up --remove-orphans
+echo "Building and starting production stack..."
+docker compose -f docker-compose.prod.yaml up --build -d
+
+echo "Showing logs (Ctrl+C to exit)..."
+docker compose -f docker-compose.prod.yaml logs -f
