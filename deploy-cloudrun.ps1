@@ -71,8 +71,7 @@ gcloud run deploy flask-app$SERVICE_SUFFIX `
     --timeout=900 `
     --memory=1Gi `
     --cpu=1 `
-    --set-env-vars=PYTHONUNBUFFERED=1 `
-    --update-env-vars=GUNICORN_CMD_ARGS=--timeout=120 `
+    --set-env-vars=PYTHONUNBUFFERED=1,GUNICORN_CMD_ARGS=--timeout=120 `
     --ingress=all `
     --min-instances=0 `
     --no-cpu-throttling
